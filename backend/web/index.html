@@ -20,7 +20,6 @@
     </form>
 
     <div id="results">
-        <!-- Search results will be displayed here -->
     </div>
 
     <script>
@@ -33,7 +32,7 @@
             fetch(`/search?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    resultsDiv.innerHTML = ''; // Clear previous results
+                    resultsDiv.innerHTML = ''; 
 
                     if (data.length === 0) {
                         resultsDiv.innerHTML = '<p>No results found.</p>';
@@ -42,7 +41,6 @@
                             var questionDiv = document.createElement('div');
                             questionDiv.className = 'question';
 
-                            // Title and Type
                             var titleElem = document.createElement('div');
                             titleElem.className = 'question-title';
                             titleElem.textContent = question.Title;
@@ -53,7 +51,6 @@
                             typeElem.textContent = `Type: ${question.Type}`;
                             questionDiv.appendChild(typeElem);
 
-                            // Render type-specific details
                             if (question.Type === 'MCQ' && question.options) {
                                 var optionsDiv = document.createElement('div');
                                 optionsDiv.className = 'options';
