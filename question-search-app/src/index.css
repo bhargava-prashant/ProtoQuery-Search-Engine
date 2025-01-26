@@ -1,3 +1,4 @@
+/* Base styles */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -7,38 +8,84 @@ body {
   background-color: #f4f4f4;
 }
 
+/* Container styles */
 .app-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.search-container {
-  display: flex;
+/* Search bar styles */
+.search-bar-container {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
   margin-bottom: 20px;
 }
 
-.search-input {
-  flex-grow: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-right: 10px;
-}
-
-.search-button {
-  padding: 10px 20px;
-  background-color: #007bff;
+.search-title {
   color: white;
-  border: none;
-  border-radius: 4px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-input-wrapper {
+  flex-grow: 1;
+  max-width: 70%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  animation: typing 2.5s steps(30) 0s 1 normal both;
+}
+
+/* MCQ and Anagram Question Page styles */
+.mcq-question-container,
+.anagram-question-container {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.option-item,
+.block-item {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.25rem;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.search-button:hover {
-  background-color: #0056b3;
+.option-item:hover {
+  background-color: #e5e7eb;
 }
 
+.blocks-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Result Item styles */
 .results-list {
   list-style-type: none;
   padding: 0;
@@ -51,19 +98,15 @@ body {
   padding: 15px;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.loading-message {
-  text-align: center;
-  color: #666;
-  padding: 20px;
+.results-list-item:hover {
+  background-color: #f8f9fa;
 }
 
-.no-results-message {
-  text-align: center;
-  color: #999;
-  padding: 20px;
-}
+/* Pagination styles */
 .pagination {
   display: flex;
   justify-content: center;
@@ -85,106 +128,15 @@ body {
   cursor: not-allowed;
 }
 
-.pagination-text {
-  color: #666;
-}
-
-.search-bar-container {
-  background: linear-gradient(to right, #2563eb, #7c3aed);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-}
-
-.search-title {
-  color: white;
-  text-align: center;
-  font-size: 1.875rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
- }
- 
- .app-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
- }
- 
- .search-bar-container {
-  background: linear-gradient(to right, #2563eb, #7c3aed);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 20px;
- }
- 
- .search-title {
-  color: white;
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.75rem;
- }
- 
- .search-form {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 600px;
-  margin: 0 auto;
- }
- 
- .search-input-wrapper {
-  flex-grow: 1;
-  max-width: 70%;
- }
- 
- .search-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
-  border: 2px solid transparent;
-  border-radius: 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
-  display: inline-block;
-  animation: typing 2.5s steps(30) 0s 1 normal both; /* Starts immediately */
-}
-
+/* Animations */
 @keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
-}
- .search-input:focus {
-  border-color: #3b82f6;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
- }
- 
- .search-button {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  animation: slideIn 2.5s ease-out 0s 1 normal forwards; /* Button slides from the left */
-  opacity: 0;
+  from { width: 0; }
+  to { width: 100%; }
 }
 
 @keyframes slideIn {
   from {
-    transform: translateX(-100%); /* Start from the left */
+    transform: translateX(-100%);
     opacity: 0;
   }
   to {
@@ -192,63 +144,99 @@ body {
     opacity: 1;
   }
 }
- 
- .search-button:hover {
-  background-color: #2563eb;
- }
- 
- .search-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
- }
- 
- .results-list {
-  list-style-type: none;
-  padding: 0;
- }
- 
- .results-list-item {
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  margin-bottom: 10px;
-  padding: 15px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
- }
- 
- .loading-message {
-  text-align: center;
-  color: #666;
-  padding: 20px;
- }
- 
- .no-results-message {
-  text-align: center;
-  color: #999;
-  padding: 20px;
- }
- 
- .pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
- }
- 
- .pagination-button {
-  padding: 8px 15px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+
+/* Utility classes */
+.cursor-pointer {
   cursor: pointer;
- }
- 
- .pagination-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
- }
- 
- .pagination-text {
-  color: #666;
- }
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: #f3f4f6;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-blue-600 {
+  color: #2563eb;
+}
+
+.text-green-600 {
+  color: #059669;
+}
+
+.hover\:underline:hover {
+  text-decoration: underline;
+}
+
+/* Back to List button */
+.back-to-list-button {
+  padding: 10px 20px;
+  background-color: #2563eb;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+.back-to-list-button:hover {
+  background-color: #1d4ed8; /* Darker shade of blue */
+}
+
+.back-to-list-button:focus {
+  outline: none;
+}
+
+/* Search button */
+/* Search button */
+.search-button {
+  padding: 10px 20px;
+  background-color: #3937bb;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+  animation: slideInFromRight 2.5s ease-out forwards; /* Apply sliding effect */
+}
+
+.search-button:hover {
+  background-color: #6b21a8;; /* Darker shade of purple */
+}
+
+.search-button:focus {
+  outline: none;
+}
+
+/* Sliding animation from the right */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%); /* Start offscreen to the right */
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0); /* Move to its original position */
+    opacity: 1;
+  }
+}
+

@@ -6,7 +6,7 @@ import './index.css';
 
 function App() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState([]); // Initialize as empty array
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,23 +19,34 @@ function App() {
     setCurrentPage(1);
 
     try {
-      // No filter logic, just use the query directly
       const response = await fetch(`/search?query=${query}`);
       const data = await response.json();
-      setResults(data);
+      
+      // If no results found, set results to empty array
+      if (!data || data.length === 0) {
+        setResults([]);
+      } else {
+        setResults(data);
+      }
+      
       setQuery(''); // Clear the search bar after generating results
     } catch (error) {
       console.error("Error fetching search results:", error);
-      setResults([]);
+      setResults([]); // Ensure results is an empty array in case of error
     } finally {
       setLoading(false);
     }
   };
 
+  // Prevent slice error if results are empty
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentResults = results.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(results.length / itemsPerPage);
+
+  const handleBackToList = () => {
+    setSearched(false); // Optional: Reset searched state to show the initial message
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-6">
@@ -48,11 +59,22 @@ function App() {
         />
 
         <div className="p-6">
-          <ResultsList 
-            results={currentResults} 
-            loading={loading} 
-            searched={searched} 
-          />
+          {!searched ? (
+            <div className="initial-message"></div>
+          ) : (
+            <>
+              {results.length === 0 ? (
+                <div className="no-results-message">No results found. Try a different query.</div>
+              ) : (
+                <ResultsList 
+                  results={currentResults} 
+                  loading={loading} 
+                  searched={searched} 
+                  onBackToList={handleBackToList} // Pass back function
+                />
+              )}
+            </>
+          )}
 
           {results.length > itemsPerPage && (
             <Pagination 
@@ -64,6 +86,11 @@ function App() {
           )}
         </div>
       </div>
+
+      {/* Footer with copyright */}
+      <footer className="absolute bottom-0 w-full text-center py-4 bg-gray-800 text-white">
+        <p>&copy; 2025 Prashant Bhargava. All rights reserved.</p>
+      </footer>
     </div>
   );
 }

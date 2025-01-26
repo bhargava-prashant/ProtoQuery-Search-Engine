@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Page</title>
+    <title>Question Search</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .question { border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; }
+        .question-title { font-weight: bold; }
+        .question-type { color: #666; }
+        .options, .blocks { margin-top: 10px; }
+    </style>
 </head>
 <body>
     <h1>Search Questions</h1>
-    <form id="searchForm" action="/search" method="get">
+    <form id="searchForm">
         <input type="text" name="query" placeholder="Enter query" id="query">
         <button type="submit">Search</button>
     </form>
@@ -18,29 +25,69 @@
 
     <script>
         document.getElementById('searchForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from reloading the page
+            event.preventDefault();
 
             var query = document.getElementById('query').value;
             var resultsDiv = document.getElementById('results');
 
-            // Fetch search results from the server
-            fetch(`/search?query=${query}`)
+            fetch(`/search?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Clear previous results
-                    resultsDiv.innerHTML = '';
+                    resultsDiv.innerHTML = ''; // Clear previous results
 
                     if (data.length === 0) {
                         resultsDiv.innerHTML = '<p>No results found.</p>';
                     } else {
-                        // Display the search results
-                        var ul = document.createElement('ul');
                         data.forEach(question => {
-                            var li = document.createElement('li');
-                            li.textContent = `ID: ${question.ID}, Title: ${question.Title}, Type: ${question.Type}`;
-                            ul.appendChild(li);
+                            var questionDiv = document.createElement('div');
+                            questionDiv.className = 'question';
+
+                            // Title and Type
+                            var titleElem = document.createElement('div');
+                            titleElem.className = 'question-title';
+                            titleElem.textContent = question.Title;
+                            questionDiv.appendChild(titleElem);
+
+                            var typeElem = document.createElement('div');
+                            typeElem.className = 'question-type';
+                            typeElem.textContent = `Type: ${question.Type}`;
+                            questionDiv.appendChild(typeElem);
+
+                            // Render type-specific details
+                            if (question.Type === 'MCQ' && question.options) {
+                                var optionsDiv = document.createElement('div');
+                                optionsDiv.className = 'options';
+                                optionsDiv.innerHTML = '<strong>Options:</strong>';
+                                question.options.forEach(opt => {
+                                    var optElem = document.createElement('div');
+                                    optElem.textContent = `${opt.text} ${opt.isCorrectAnswer ? '(Correct)' : ''}`;
+                                    optionsDiv.appendChild(optElem);
+                                });
+                                questionDiv.appendChild(optionsDiv);
+                            }
+
+                            if (question.Type === 'ANAGRAM') {
+                                if (question.blocks) {
+                                    var blocksDiv = document.createElement('div');
+                                    blocksDiv.className = 'blocks';
+                                    blocksDiv.innerHTML = '<strong>Blocks:</strong>';
+                                    question.blocks.forEach(block => {
+                                        var blockElem = document.createElement('div');
+                                        blockElem.textContent = `Text: ${block.text}, Show in Option: ${block.showInOption}, Is Answer: ${block.isAnswer}`;
+                                        blocksDiv.appendChild(blockElem);
+                                    });
+                                    questionDiv.appendChild(blocksDiv);
+                                }
+
+                                if (question.solution) {
+                                    var solutionElem = document.createElement('div');
+                                    solutionElem.innerHTML = `<strong>Solution:</strong> ${question.solution}`;
+                                    questionDiv.appendChild(solutionElem);
+                                }
+                            }
+
+                            resultsDiv.appendChild(questionDiv);
                         });
-                        resultsDiv.appendChild(ul);
                     }
                 })
                 .catch(error => {

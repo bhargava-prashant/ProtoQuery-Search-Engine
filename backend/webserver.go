@@ -14,7 +14,7 @@ import (
 // searchQuestionsHandler handles the search query and interacts with the gRPC server
 func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	// Connect to the gRPC server
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // Assuming your server is running on localhost:50051
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to connect: %v", err), http.StatusInternalServerError)
 		return
@@ -24,8 +24,8 @@ func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a client for the QuestionService
 	client := proto.NewQuestionServiceClient(conn)
 
-	// Prepare the search request (adjust the query as needed)
-	query := r.URL.Query().Get("query") // Get query parameter from the URL
+	// Prepare the search request
+	query := r.URL.Query().Get("query")
 	if query == "" {
 		http.Error(w, "Missing query parameter", http.StatusBadRequest)
 		return
@@ -44,14 +44,41 @@ func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	var result []map[string]string
-	// Collect results
+	// Prepare a more detailed result structure
+	var result []map[string]interface{}
 	for _, question := range resp.GetQuestions() {
-		result = append(result, map[string]string{
+		questionDetail := map[string]interface{}{
 			"ID":    question.GetId(),
 			"Title": question.GetTitle(),
 			"Type":  question.GetType(),
-		})
+		}
+
+		// Add type-specific details
+		switch question.GetType() {
+		case "MCQ":
+			var options []map[string]interface{}
+			for _, opt := range question.GetOptions() {
+				options = append(options, map[string]interface{}{
+					"text":            opt.GetText(),
+					"isCorrectAnswer": opt.GetIsCorrectAnswer(),
+				})
+			}
+			questionDetail["options"] = options
+		
+		case "ANAGRAM":
+			var blocks []map[string]interface{}
+			for _, block := range question.GetBlocks() {
+				blocks = append(blocks, map[string]interface{}{
+					"text":         block.GetText(),
+					"showInOption": block.GetShowInOption(),
+					"isAnswer":     block.GetIsAnswer(),
+				})
+			}
+			questionDetail["blocks"] = blocks
+			questionDetail["solution"] = question.GetSolution()
+		}
+
+		result = append(result, questionDetail)
 	}
 
 	// Encode to JSON
@@ -60,9 +87,8 @@ func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ServeIndexFile serves the index.html file directly when accessed from root URL
+// ServeIndexFile serves the index.html file
 func ServeIndexFile(w http.ResponseWriter, r *http.Request) {
-	// Open the index.html file from the "web" directory
 	file, err := os.Open("./web/index.html")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error opening index.html: %v", err), http.StatusInternalServerError)
@@ -70,27 +96,22 @@ func ServeIndexFile(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Get file stats for the file's modification time
 	fileInfo, err := file.Stat()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error getting file stats: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	// Serve the file content
 	http.ServeContent(w, r, "index.html", fileInfo.ModTime(), file)
 }
 
+// Main function with added closing brace
 func main() {
-	// Handle the root URL by serving the index.html file directly
 	http.HandleFunc("/", ServeIndexFile)
-
-	// Handle search requests
 	http.HandleFunc("/search", searchQuestionsHandler)
 
-	// Start the web server on port 8080
 	log.Println("Web server starting on port 8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Failed to start web server: %v", err)
 	}
-}
+} 
