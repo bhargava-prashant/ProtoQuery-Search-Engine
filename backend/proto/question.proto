@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package questionservice;
+
+option go_package = "./proto";
+
+service QuestionService {
+  rpc SearchQuestions (SearchRequest) returns (SearchResponse) {}
+}
+
+message SearchRequest {
+  string query = 1;
+}
+
+message SearchResponse {
+  repeated Question questions = 1;
+}
+
+message Question {
+  string id = 1;
+  string type = 2;
+  string title = 3;
+  repeated Option options = 4;
+  repeated Block blocks = 5;
+  string solution = 6;
+}
+
+message Option {
+  string text = 1;
+  bool isCorrectAnswer = 2;
+}
+
+message Block {
+  string text = 1;
+  bool showInOption = 2;
+  bool isAnswer = 3;
+}

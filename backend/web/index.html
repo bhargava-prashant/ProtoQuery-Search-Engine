@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+</head>
+<body>
+    <h1>Search Questions</h1>
+    <form id="searchForm" action="/search" method="get">
+        <input type="text" name="query" placeholder="Enter query" id="query">
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="results">
+        <!-- Search results will be displayed here -->
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from reloading the page
+
+            var query = document.getElementById('query').value;
+            var resultsDiv = document.getElementById('results');
+
+            // Fetch search results from the server
+            fetch(`/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear previous results
+                    resultsDiv.innerHTML = '';
+
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = '<p>No results found.</p>';
+                    } else {
+                        // Display the search results
+                        var ul = document.createElement('ul');
+                        data.forEach(question => {
+                            var li = document.createElement('li');
+                            li.textContent = `ID: ${question.ID}, Title: ${question.Title}, Type: ${question.Type}`;
+                            ul.appendChild(li);
+                        });
+                        resultsDiv.appendChild(ul);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    resultsDiv.innerHTML = '<p>Error fetching results.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
