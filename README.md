@@ -196,24 +196,19 @@ services:
 The project uses a modular CSS approach with separate files for components:
 
 ```css
-/* index.css */
 .min-h-screen {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* SearchBar styles */
 .search-container {
   padding: 1.5rem;
   background: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-/* ResultsList styles */
 .results-container {
   padding: 1.5rem;
 }
-
 .question-card {
   background: white;
   border-radius: 8px;
@@ -222,7 +217,6 @@ The project uses a modular CSS approach with separate files for components:
   padding: 1rem;
 }
 
-/* Pagination styles */
 .pagination {
   display: flex;
   justify-content: center;
