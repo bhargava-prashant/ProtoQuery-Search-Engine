@@ -30,7 +30,6 @@ func (s *QuestionServer) SearchQuestions(ctx context.Context, req *pb.SearchRequ
 
     collection := s.mongoClient.DB.Collection("questions")
     
-    // Create a filter to search by title or type using regex
     filter := bson.M{
         "$or": []bson.M{
             {"title": bson.M{"$regex": req.Query, "$options": "i"}},
@@ -38,10 +37,8 @@ func (s *QuestionServer) SearchQuestions(ctx context.Context, req *pb.SearchRequ
         },
     }
 
-    // Set up pagination (limit to 50 results)
     findOptions := options.Find().SetLimit(50)
 
-    // Perform the database query
     cur, err := collection.Find(ctx, filter, findOptions)
     if err != nil {
         log.Printf("Error during query execution: %v", err)
@@ -57,14 +54,12 @@ func (s *QuestionServer) SearchQuestions(ctx context.Context, req *pb.SearchRequ
             continue
         }
     
-        // Convert the ObjectID to string
         pbQuestion := &pb.Question{
             Id:    question["_id"].(primitive.ObjectID).Hex(),
             Type:  question["type"].(string),
             Title: question["title"].(string),
         }
     
-        // Handle different question types
         switch pbQuestion.Type {
         case "MCQ":
             if options, ok := question["options"].(primitive.A); ok {
@@ -105,10 +100,9 @@ func StartGRPCServer(mongoClient *database.MongoDBClient, port string) {
         log.Fatalf("Failed to listen: %v", err)
     }
     
-    // Increase max message size
     grpcServer := grpc.NewServer(
-        grpc.MaxRecvMsgSize(50*1024*1024),  // 50 MB
-        grpc.MaxSendMsgSize(50*1024*1024),  // 50 MB
+        grpc.MaxRecvMsgSize(50*1024*1024),
+        grpc.MaxSendMsgSize(50*1024*1024),
     )
     
     questionServer := NewQuestionServer(mongoClient)

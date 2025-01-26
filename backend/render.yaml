@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: question-search-app
+    env: go
+    buildCommand: go build -o app
+    startCommand: ./app
+    envVars:
+      - key: PORT
+        value: 10000
