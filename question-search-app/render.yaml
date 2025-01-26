@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: question-search-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        value: https://querysearch.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

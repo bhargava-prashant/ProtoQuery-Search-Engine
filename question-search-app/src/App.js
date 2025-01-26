@@ -6,11 +6,15 @@ import './index.css';
 
 function App() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]); // Initialize as empty array
+  const [results, setResults] = useState([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
+
+  // Get backend URL from environment variables
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  console.log('Backend URL:', BACKEND_URL); // For debugging
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -19,33 +23,47 @@ function App() {
     setCurrentPage(1);
 
     try {
-      const response = await fetch(`/search?query=${query}`);
-      const data = await response.json();
+      console.log('Searching:', `${BACKEND_URL}/search?query=${encodeURIComponent(query)}`);
       
-      // If no results found, set results to empty array
+      const response = await fetch(
+        `${BACKEND_URL}/search?query=${encodeURIComponent(query)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Search results:', data);
+      
       if (!data || data.length === 0) {
         setResults([]);
       } else {
         setResults(data);
       }
       
-      setQuery(''); // Clear the search bar after generating results
+      setQuery('');
     } catch (error) {
       console.error("Error fetching search results:", error);
-      setResults([]); // Ensure results is an empty array in case of error
+      setResults([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Prevent slice error if results are empty
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentResults = results.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(results.length / itemsPerPage);
 
   const handleBackToList = () => {
-    setSearched(false); // Optional: Reset searched state to show the initial message
+    setSearched(false);
   };
 
   return (
@@ -70,7 +88,7 @@ function App() {
                   results={currentResults} 
                   loading={loading} 
                   searched={searched} 
-                  onBackToList={handleBackToList} // Pass back function
+                  onBackToList={handleBackToList}
                 />
               )}
             </>
@@ -87,7 +105,6 @@ function App() {
         </div>
       </div>
 
-      {/* Footer with copyright */}
       <footer className="absolute bottom-0 w-full text-center py-4 bg-gray-800 text-white">
         <p>&copy; 2025 Prashant Bhargava. All rights reserved.</p>
       </footer>

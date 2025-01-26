@@ -15,10 +15,31 @@ import (
     "google.golang.org/grpc"
 )
 
+// CORS Middleware
+func enableCORS(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        // Set CORS headers
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+        // Handle preflight requests
+        if r.Method == "OPTIONS" {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+
+        next(w, r)
+    }
+}
+
 func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
+    log.Printf("Received search request: %s", r.URL.String())
+
     // Connect to the gRPC server
     conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
     if err != nil {
+        log.Printf("Failed to connect to gRPC server: %v", err)
         http.Error(w, fmt.Sprintf("Failed to connect: %v", err), http.StatusInternalServerError)
         return
     }
@@ -30,6 +51,7 @@ func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
     // Prepare the search request
     query := r.URL.Query().Get("query")
     if query == "" {
+        log.Printf("Missing query parameter")
         http.Error(w, "Missing query parameter", http.StatusBadRequest)
         return
     }
@@ -39,12 +61,14 @@ func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
     // Send the request and get the response
     resp, err := client.SearchQuestions(context.Background(), req)
     if err != nil {
+        log.Printf("Error during SearchQuestions: %v", err)
         http.Error(w, fmt.Sprintf("Error during SearchQuestions: %v", err), http.StatusInternalServerError)
         return
     }
 
     // Write JSON response
     w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
     w.WriteHeader(http.StatusOK)
 
     // Prepare a more detailed result structure
@@ -84,13 +108,17 @@ func searchQuestionsHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     if err := json.NewEncoder(w).Encode(result); err != nil {
+        log.Printf("Error encoding JSON: %v", err)
         http.Error(w, fmt.Sprintf("Error encoding JSON: %v", err), http.StatusInternalServerError)
     }
+
+    log.Printf("Successfully returned %d results", len(result))
 }
 
 func ServeIndexFile(w http.ResponseWriter, r *http.Request) {
     file, err := os.Open("./web/index.html")
     if err != nil {
+        log.Printf("Error opening index.html: %v", err)
         http.Error(w, fmt.Sprintf("Error opening index.html: %v", err), http.StatusInternalServerError)
         return
     }
@@ -98,6 +126,7 @@ func ServeIndexFile(w http.ResponseWriter, r *http.Request) {
 
     fileInfo, err := file.Stat()
     if err != nil {
+        log.Printf("Error getting file stats: %v", err)
         http.Error(w, fmt.Sprintf("Error getting file stats: %v", err), http.StatusInternalServerError)
         return
     }
@@ -119,9 +148,9 @@ func main() {
         server.StartGRPCServer(mongoClient, ":50051")
     }()
 
-    // Set up HTTP handlers
-    http.HandleFunc("/", ServeIndexFile)
-    http.HandleFunc("/search", searchQuestionsHandler)
+    // Set up HTTP handlers with CORS middleware
+    http.HandleFunc("/", enableCORS(ServeIndexFile))
+    http.HandleFunc("/search", enableCORS(searchQuestionsHandler))
 
     // Get port from environment variable
     port := os.Getenv("PORT")
@@ -129,10 +158,14 @@ func main() {
         port = "8080"
     }
 
-    log.Printf("Web server starting on port %s", port)
-    log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(
+    // Create custom CORS handler
+    corsMiddleware := handlers.CORS(
         handlers.AllowedOrigins([]string{"*"}),
         handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
-        handlers.AllowedHeaders([]string{"Content-Type"}),
-    )(http.DefaultServeMux)))
+        handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+    )
+
+    // Start the server with both custom middleware and gorilla/handlers CORS
+    log.Printf("Web server starting on port %s", port)
+    log.Fatal(http.ListenAndServe(":"+port, corsMiddleware(http.DefaultServeMux)))
 }
