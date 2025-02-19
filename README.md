@@ -1,4 +1,4 @@
-# Question Search Application
+# ProtoQuery Search Engine
 
 A high-performance search application built with Go, gRPC, MongoDB, and React. This application efficiently handles and searches through 100,000+ question entries, supporting multiple question types including MCQ and ANAGRAM formats.
 
